@@ -187,7 +187,7 @@ app.get("/api/stats", (req, res) => {
 // ─── Health check ─────────────────────────────────────────────────────────────
 app.get("/api/health", (_, res) => res.json({ status: "ok" }));
 
-app.listen(PORT, () => {
+app.listen(PORT, "0.0.0.0", () => {
   console.log(`Dead Nice Audit Server running on port ${PORT}`);
   if (!process.env.ANTHROPIC_API_KEY) {
     console.warn("⚠  ANTHROPIC_API_KEY not set — requests will fail");
