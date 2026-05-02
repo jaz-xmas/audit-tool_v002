@@ -12,10 +12,25 @@ const PORT = process.env.PORT || 3001;
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
 // ─── Middleware ───────────────────────────────────────────────────────────────
+const allowedOrigins = (process.env.CLIENT_ORIGIN || "http://localhost:5173")
+  .split(",").map(o => o.trim());
+
 app.use(cors({
-  origin: process.env.CLIENT_ORIGIN || "http://localhost:5173",
-  methods: ["GET", "POST"],
+  origin: function(origin, callback) {
+    // Allow requests with no origin (e.g. curl, Postman) or matched origins
+    if (!origin || allowedOrigins.includes("*") || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS: " + origin));
+    }
+  },
+  methods: ["GET", "POST", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+  credentials: false,
 }));
+
+// Handle preflight requests
+app.options("*", cors());
 app.use(express.json({ limit: "10mb" }));
 
 // In-memory storage for screenshots (max 8 MB per file)
